@@ -6,6 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6580880530745B01001B10B0 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 6580880430745B01001B10B0 /* FirebaseAuth */; };
+		6580880730745B01001B10B0 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 6580880630745B01001B10B0 /* FirebaseFirestore */; };
+		6580880930745B01001B10B0 /* FirebaseInAppMessaging-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 6580880830745B01001B10B0 /* FirebaseInAppMessaging-Beta */; };
+		6580880B30745B01001B10B0 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 6580880A30745B01001B10B0 /* FirebaseMessaging */; };
+		6580880D30745B01001B10B0 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 6580880C30745B01001B10B0 /* FirebaseStorage */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		65DE4C8C30730E4200070944 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,14 +32,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		65A1F9C73075BC2B00EB8832 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		65DE4C7E30730E4000070944 /* Eventorias.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eventorias.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		65DE4C8B30730E4200070944 /* EventoriasTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		65DE4C9530730E4200070944 /* EventoriasUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		65A1F9CA3076ACAC00EB8832 /* Exceptions for "Eventorias" folder in "Eventorias" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 65DE4C7D30730E4000070944 /* Eventorias */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		65DE4C8030730E4000070944 /* Eventorias */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				65A1F9CA3076ACAC00EB8832 /* Exceptions for "Eventorias" folder in "Eventorias" target */,
+			);
 			path = Eventorias;
 			sourceTree = "<group>";
 		};
@@ -52,6 +74,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6580880B30745B01001B10B0 /* FirebaseMessaging in Frameworks */,
+				6580880530745B01001B10B0 /* FirebaseAuth in Frameworks */,
+				6580880730745B01001B10B0 /* FirebaseFirestore in Frameworks */,
+				6580880D30745B01001B10B0 /* FirebaseStorage in Frameworks */,
+				6580880930745B01001B10B0 /* FirebaseInAppMessaging-Beta in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +106,7 @@
 				65DE4C8E30730E4200070944 /* EventoriasTests */,
 				65DE4C9830730E4200070944 /* EventoriasUITests */,
 				65DE4C7F30730E4000070944 /* Products */,
+				65A1F9C73075BC2B00EB8832 /* Secrets.xcconfig */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +140,11 @@
 			);
 			name = Eventorias;
 			packageProductDependencies = (
+				6580880430745B01001B10B0 /* FirebaseAuth */,
+				6580880630745B01001B10B0 /* FirebaseFirestore */,
+				6580880830745B01001B10B0 /* FirebaseInAppMessaging-Beta */,
+				6580880A30745B01001B10B0 /* FirebaseMessaging */,
+				6580880C30745B01001B10B0 /* FirebaseStorage */,
 			);
 			productName = Eventorias;
 			productReference = 65DE4C7E30730E4000070944 /* Eventorias.app */;
@@ -195,6 +228,9 @@
 			);
 			mainGroup = 65DE4C7530730E4000070944;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 65DE4C7F30730E4000070944 /* Products */;
 			projectDirPath = "";
@@ -392,6 +428,7 @@
 		};
 		65DE4CA030730E4200070944 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 65A1F9C73075BC2B00EB8832 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -400,6 +437,7 @@
 				DEVELOPMENT_TEAM = FBTB99PJAR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Eventorias/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -424,6 +462,7 @@
 		};
 		65DE4CA130730E4200070944 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 65A1F9C73075BC2B00EB8832 /* Secrets.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -432,6 +471,7 @@
 				DEVELOPMENT_TEAM = FBTB99PJAR;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Eventorias/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -578,6 +618,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.19.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		6580880430745B01001B10B0 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		6580880630745B01001B10B0 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		6580880830745B01001B10B0 /* FirebaseInAppMessaging-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseInAppMessaging-Beta";
+		};
+		6580880A30745B01001B10B0 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		6580880C30745B01001B10B0 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6580880330745B01001B10B0 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 65DE4C7630730E4000070944 /* Project object */;
 }
