@@ -5,31 +5,70 @@
 //  Created by Sarah Maimoun on 06/10/2026.
 //
 
+
 import SwiftUI
 
+@MainActor
 struct MainTabView: View {
 
-    @ObservedObject var loginViewModel: LoginViewModel
+    @ObservedObject var loginViewModel:
+        LoginViewModel
+
+    private let eventListViewModel:
+        EventListViewModel?
+
+    private let profileViewModel:
+        ProfileViewModel?
+
+    // MARK: - Init
+
+    init(
+        loginViewModel: LoginViewModel,
+        eventListViewModel: EventListViewModel? = nil,
+        profileViewModel: ProfileViewModel? = nil
+    ) {
+
+        self.loginViewModel =
+            loginViewModel
+
+        self.eventListViewModel =
+            eventListViewModel
+
+        self.profileViewModel =
+            profileViewModel
+    }
+
+    // MARK: - Body
 
     var body: some View {
 
         TabView {
 
-            EventListView()
-                .tabItem {
-                    Label(
-                        "Events",
-                        systemImage: "calendar"
-                    )
-                }
-
-            ProfileView(
-                loginViewModel: loginViewModel
+            EventListView(
+                viewModel:
+                    eventListViewModel
             )
             .tabItem {
+
                 Label(
-                    "Profile",
-                    systemImage: "person"
+                    "Événements",
+                    systemImage:
+                        "calendar"
+                )
+            }
+
+            ProfileView(
+                loginViewModel:
+                    loginViewModel,
+                viewModel:
+                    profileViewModel
+            )
+            .tabItem {
+
+                Label(
+                    "Profil",
+                    systemImage:
+                        "person"
                 )
             }
         }
@@ -40,17 +79,23 @@ struct MainTabView: View {
                 green: 0.07,
                 blue: 0.09
             ),
-            for: .tabBar
+            for:
+                .tabBar
         )
         .toolbarBackground(
             .visible,
-            for: .tabBar
+            for:
+                .tabBar
         )
     }
 }
 
+// MARK: - Preview
+
 #Preview {
+
     MainTabView(
-        loginViewModel: LoginViewModel()
+        loginViewModel:
+            LoginViewModel()
     )
 }

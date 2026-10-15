@@ -5,17 +5,24 @@
 //  Created by Sarah Maimoun on 06/10/2026.
 //
 
+
 import SwiftUI
 
 struct LoginView: View {
 
-    @ObservedObject var viewModel: LoginViewModel
+    @ObservedObject var viewModel:
+        LoginViewModel
 
-    @State private var showForm = false
-    @State private var isPasswordVisible = false
+    @State private var showForm =
+        false
+
+    @State private var isPasswordVisible =
+        false
 
     var body: some View {
+
         ZStack {
+
             Color(
                 red: 0.08,
                 green: 0.07,
@@ -24,39 +31,44 @@ struct LoginView: View {
             .ignoresSafeArea()
 
             if showForm {
+
                 authenticationForm
+
             } else {
+
                 welcomeScreen
             }
 
             if viewModel.isLoading {
+
                 loadingView
             }
         }
         .alert(
             "Erreur",
-            isPresented: Binding(
-                get: {
-                    viewModel.errorMessage != nil
-                },
-                set: { isPresented in
-                    if !isPresented {
-                        viewModel.errorMessage = nil
-                    }
-                }
-            )
+            isPresented:
+                errorBinding
         ) {
+
             Button("OK") {
-                viewModel.errorMessage = nil
+
+                viewModel.errorMessage =
+                    nil
             }
+
         } message: {
+
             Text(
-                viewModel.errorMessage ?? ""
+                viewModel.errorMessage
+                ?? ""
             )
         }
     }
 
-    private var welcomeScreen: some View {
+    // MARK: - Welcome
+
+    private var welcomeScreen:
+        some View {
 
         VStack {
 
@@ -66,28 +78,42 @@ struct LoginView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 210)
-                .accessibilityLabel("Eventorias")
+                .accessibilityLabel(
+                    "Eventorias"
+                )
 
             Spacer()
                 .frame(height: 65)
 
             Button {
+
                 showForm = true
+
             } label: {
 
                 HStack(spacing: 10) {
 
                     Image(
-                        systemName: "envelope.fill"
+                        systemName:
+                            "envelope.fill"
                     )
 
-                    Text("Sign in with email")
-                        .fontWeight(.semibold)
+                    Text(
+                        "Sign in with email"
+                    )
+                    .fontWeight(
+                        .semibold
+                    )
                 }
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
+                .frame(
+                    maxWidth:
+                        .infinity
+                )
                 .frame(height: 52)
-                .background(Color.red)
+                .background(
+                    Color.red
+                )
                 .clipShape(
                     RoundedRectangle(
                         cornerRadius: 4
@@ -101,27 +127,43 @@ struct LoginView: View {
             .accessibilityLabel(
                 "Se connecter avec une adresse e-mail"
             )
+            .accessibilityIdentifier(
+                "login.emailEntry"
+            )
 
             Spacer()
         }
     }
 
-    private var authenticationForm: some View {
+    // MARK: - Formulaire
+
+    private var authenticationForm:
+        some View {
 
         VStack(spacing: 24) {
 
             HStack {
 
                 Button {
+
                     showForm = false
+
                 } label: {
 
                     Image(
-                        systemName: "chevron.left"
+                        systemName:
+                            "chevron.left"
                     )
-                    .foregroundStyle(.white)
+                    .foregroundStyle(
+                        .white
+                    )
                 }
-                .accessibilityLabel("Retour")
+                .accessibilityLabel(
+                    "Retour"
+                )
+                .accessibilityIdentifier(
+                    "login.back"
+                )
 
                 Spacer()
             }
@@ -130,7 +172,9 @@ struct LoginView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 170)
-                .accessibilityLabel("Eventorias")
+                .accessibilityLabel(
+                    "Eventorias"
+                )
 
             Text(
                 viewModel.isRegisterMode
@@ -143,14 +187,20 @@ struct LoginView: View {
             .accessibilityAddTraits(
                 .isHeader
             )
+            .accessibilityIdentifier(
+                "login.title"
+            )
 
             VStack(spacing: 16) {
 
                 TextField(
                     "Adresse e-mail",
-                    text: $viewModel.email
+                    text:
+                        $viewModel.email
                 )
-                .keyboardType(.emailAddress)
+                .keyboardType(
+                    .emailAddress
+                )
                 .textInputAutocapitalization(
                     .never
                 )
@@ -160,13 +210,17 @@ struct LoginView: View {
                 )
                 .padding()
                 .background(
-                    Color.white.opacity(0.15)
+                    Color.white
+                        .opacity(0.15)
                 )
                 .foregroundStyle(.white)
                 .clipShape(
                     RoundedRectangle(
                         cornerRadius: 8
                     )
+                )
+                .accessibilityIdentifier(
+                    "login.email"
                 )
 
                 HStack {
@@ -175,7 +229,8 @@ struct LoginView: View {
 
                         TextField(
                             "Mot de passe",
-                            text: $viewModel.password
+                            text:
+                                $viewModel.password
                         )
                         .textInputAutocapitalization(
                             .never
@@ -186,22 +241,32 @@ struct LoginView: View {
                             ? .newPassword
                             : .password
                         )
+                        .accessibilityIdentifier(
+                            "login.password"
+                        )
 
                     } else {
 
                         SecureField(
                             "Mot de passe",
-                            text: $viewModel.password
+                            text:
+                                $viewModel.password
                         )
                         .textContentType(
                             viewModel.isRegisterMode
                             ? .newPassword
                             : .password
                         )
+                        .accessibilityIdentifier(
+                            "login.password"
+                        )
                     }
 
                     Button {
-                        isPasswordVisible.toggle()
+
+                        isPasswordVisible
+                            .toggle()
+
                     } label: {
 
                         Image(
@@ -211,7 +276,8 @@ struct LoginView: View {
                                 : "eye"
                         )
                         .foregroundStyle(
-                            .white.opacity(0.8)
+                            .white
+                                .opacity(0.8)
                         )
                     }
                     .accessibilityLabel(
@@ -219,10 +285,14 @@ struct LoginView: View {
                         ? "Masquer le mot de passe"
                         : "Afficher le mot de passe"
                     )
+                    .accessibilityIdentifier(
+                        "login.passwordVisibility"
+                    )
                 }
                 .padding()
                 .background(
-                    Color.white.opacity(0.15)
+                    Color.white
+                        .opacity(0.15)
                 )
                 .foregroundStyle(.white)
                 .clipShape(
@@ -235,7 +305,9 @@ struct LoginView: View {
             Button {
 
                 Task {
-                    await viewModel.authenticate()
+
+                    await viewModel
+                        .authenticate()
                 }
 
             } label: {
@@ -245,11 +317,18 @@ struct LoginView: View {
                     ? "Créer mon compte"
                     : "Se connecter"
                 )
-                .fontWeight(.semibold)
+                .fontWeight(
+                    .semibold
+                )
                 .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
+                .frame(
+                    maxWidth:
+                        .infinity
+                )
                 .frame(height: 52)
-                .background(Color.red)
+                .background(
+                    Color.red
+                )
                 .clipShape(
                     RoundedRectangle(
                         cornerRadius: 4
@@ -259,6 +338,9 @@ struct LoginView: View {
             .disabled(
                 viewModel.isLoading
             )
+            .accessibilityIdentifier(
+                "login.submit"
+            )
 
             Button {
 
@@ -266,10 +348,14 @@ struct LoginView: View {
                     .isRegisterMode
                     .toggle()
 
-                viewModel.password = ""
-                viewModel.errorMessage = nil
+                viewModel.password =
+                    ""
 
-                isPasswordVisible = false
+                viewModel.errorMessage =
+                    nil
+
+                isPasswordVisible =
+                    false
 
             } label: {
 
@@ -281,6 +367,9 @@ struct LoginView: View {
                 .foregroundStyle(.white)
                 .underline()
             }
+            .accessibilityIdentifier(
+                "login.modeToggle"
+            )
 
             Spacer()
         }
@@ -294,7 +383,10 @@ struct LoginView: View {
         )
     }
 
-    private var loadingView: some View {
+    // MARK: - Loading
+
+    private var loadingView:
+        some View {
 
         ZStack {
 
@@ -313,10 +405,36 @@ struct LoginView: View {
                 )
         }
     }
+
+    // MARK: - Error
+
+    private var errorBinding:
+        Binding<Bool> {
+
+        Binding(
+            get: {
+
+                viewModel
+                    .errorMessage
+                    != nil
+            },
+            set: { value in
+
+                if !value {
+
+                    viewModel
+                        .errorMessage =
+                        nil
+                }
+            }
+        )
+    }
 }
 
 #Preview {
+
     LoginView(
-        viewModel: LoginViewModel()
+        viewModel:
+            LoginViewModel()
     )
 }

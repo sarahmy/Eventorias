@@ -7,149 +7,153 @@
 
 import Foundation
 import Combine
-import FirebaseFirestore
 
 @MainActor
-final class EventListViewModel: ObservableObject {
+final class EventListViewModel:
+    ObservableObject {
 
-    enum SortOption: String, CaseIterable {
-        case dateAscending = "Date : plus proche"
-        case dateDescending = "Date : plus lointaine"
-        case titleAscending = "Titre : A → Z"
-        case titleDescending = "Titre : Z → A"
+    enum SortOption:
+        String,
+        CaseIterable {
+
+        case dateAscending =
+            "Date : plus proche"
+
+        case dateDescending =
+            "Date : plus lointaine"
+
+        case titleAscending =
+            "Titre : A → Z"
+
+        case titleDescending =
+            "Titre : Z → A"
     }
 
-    @Published var events: [EventModel] = []
-    @Published var searchText = ""
-    @Published var isLoading = false
-    @Published var errorMessage: String?
+    @Published var events:
+        [EventModel] = []
 
-    @Published var selectedSortOption: SortOption = .dateAscending
+    @Published var searchText =
+        ""
 
-    private let database = Firestore.firestore()
-    private var searchTask: Task<Void, Never>?
+    @Published var isLoading =
+        false
+
+    @Published var errorMessage:
+        String?
+
+    @Published var selectedSortOption:
+        SortOption =
+            .dateAscending
+
+    private let repository:
+        EventListRepositoryProtocol
+
+    private let searchDelay:
+        Duration
+
+    private var searchTask:
+        Task<Void, Never>?
+
+    // MARK: - Init
+
+    init(
+        repository:
+            EventListRepositoryProtocol? = nil,
+        searchDelay:
+            Duration =
+                .milliseconds(300)
+    ) {
+
+        self.repository =
+            repository
+            ?? FirebaseEventListRepository()
+
+        self.searchDelay =
+            searchDelay
+    }
+
+    // MARK: - Chargement
 
     func loadEvents() async {
 
         isLoading = true
         errorMessage = nil
 
-        let searchTerms = makeSearchTerms(
-            from: searchText
-        )
+        defer {
+            isLoading = false
+        }
+
+        let searchTerms =
+            makeSearchTerms(
+                from:
+                    searchText
+            )
 
         do {
 
-            let snapshot: QuerySnapshot
-
-            if searchTerms.isEmpty {
-
-                snapshot = try await database
-                    .collection("events")
-                    .getDocuments()
-
-            } else {
-
-                snapshot = try await database
-                    .collection("events")
-                    .whereField(
-                        "searchKeywords",
-                        arrayContainsAny: Array(
-                            searchTerms.prefix(30)
-                        )
-                    )
-                    .getDocuments()
-            }
-
-            var loadedEvents: [EventModel] = []
-
-            for document in snapshot.documents {
-
-                let data = document.data()
-
-                guard
-                    let title = data["title"] as? String,
-                    let timestamp = data["date"] as? Timestamp,
-                    let location = data["location"] as? String,
-                    let category = data["category"] as? String,
-                    let ownerId = data["ownerId"] as? String
-                else {
-                    print(
-                        "[Firestore] Document invalide :",
-                        document.documentID
+            let loadedEvents =
+                try await repository
+                    .fetchEvents(
+                        searchTerms:
+                            searchTerms
                     )
 
-                    continue
-                }
-
-                let description =
-                    data["description"] as? String ?? ""
-
-                let titleLowercase =
-                    data["titleLowercase"] as? String
-                    ?? title.lowercased()
-
-                let imageURL =
-                    data["imageURL"] as? String
-
-                let event = EventModel(
-                    id: document.documentID,
-                    title: title,
-                    titleLowercase: titleLowercase,
-                    description: description,
-                    date: timestamp.dateValue(),
-                    location: location,
-                    category: category,
-                    ownerId: ownerId,
-                    imageURL: imageURL
-                )
-
-                loadedEvents.append(event)
-            }
-
-            events = loadedEvents
+            events =
+                loadedEvents
 
             sortEvents()
 
         } catch {
 
             print(
-                "[Firestore] Erreur :",
+                "[Events] Chargement :",
                 error.localizedDescription
             )
 
+            events = []
+
             errorMessage =
                 "Impossible de charger les événements."
-
-            events = []
         }
-
-        isLoading = false
     }
+
+    // MARK: - Recherche
 
     func searchTextDidChange() {
 
         searchTask?.cancel()
 
-        searchTask = Task {
+        let delay =
+            searchDelay
 
-            try? await Task.sleep(
-                for: .milliseconds(300)
-            )
+        searchTask =
+            Task { [weak self] in
 
-            guard !Task.isCancelled else {
-                return
+                try? await Task.sleep(
+                    for:
+                        delay
+                )
+
+                guard
+                    !Task.isCancelled
+                else {
+                    return
+                }
+
+                await self?
+                    .loadEvents()
             }
-
-            await loadEvents()
-        }
     }
 
+    // MARK: - Tri
+
     func selectSortOption(
-        _ option: SortOption
+        _ option:
+            SortOption
     ) {
 
-        selectedSortOption = option
+        selectedSortOption =
+            option
 
         sortEvents()
     }
@@ -161,64 +165,78 @@ final class EventListViewModel: ObservableObject {
         case .dateAscending:
 
             events.sort {
-                $0.date < $1.date
+
+                $0.date <
+                $1.date
             }
 
         case .dateDescending:
 
             events.sort {
-                $0.date > $1.date
+
+                $0.date >
+                $1.date
             }
 
         case .titleAscending:
 
             events.sort {
-                $0.title.localizedCaseInsensitiveCompare(
-                    $1.title
-                ) == .orderedAscending
+
+                $0.title
+                    .localizedCaseInsensitiveCompare(
+                        $1.title
+                    )
+                == .orderedAscending
             }
 
         case .titleDescending:
 
             events.sort {
-                $0.title.localizedCaseInsensitiveCompare(
-                    $1.title
-                ) == .orderedDescending
+
+                $0.title
+                    .localizedCaseInsensitiveCompare(
+                        $1.title
+                    )
+                == .orderedDescending
             }
         }
     }
+
+    // MARK: - Recherche normalisée
 
     private func makeSearchTerms(
         from text: String
     ) -> [String] {
 
-        let normalizedText = text
-            .folding(
-                options: [
-                    .diacriticInsensitive,
-                    .caseInsensitive
-                ],
-                locale: .current
-            )
-            .lowercased()
+        let normalizedText =
+            text
+                .folding(
+                    options: [
+                        .diacriticInsensitive,
+                        .caseInsensitive
+                    ],
+                    locale:
+                        .current
+                )
+                .lowercased()
 
         let separators =
-            CharacterSet.alphanumerics.inverted
+            CharacterSet
+                .alphanumerics
+                .inverted
 
-        let terms = normalizedText
-            .components(
-                separatedBy: separators
-            )
-            .filter {
-                !$0.isEmpty
-            }
+        let terms =
+            normalizedText
+                .components(
+                    separatedBy:
+                        separators
+                )
+                .filter {
+                    !$0.isEmpty
+                }
 
         return Array(
             Set(terms)
         )
-    }
-
-    deinit {
-        searchTask?.cancel()
     }
 }

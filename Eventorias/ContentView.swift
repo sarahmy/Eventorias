@@ -5,6 +5,7 @@
 //  Created by Sarah Maimoun on 05/10/2026.
 //
 
+
 import SwiftUI
 
 struct ContentView: View {
@@ -14,18 +15,27 @@ struct ContentView: View {
 
     var body: some View {
 
-        if loginViewModel.isAuthenticated {
+        Group {
 
-            MainTabView(
-                loginViewModel: loginViewModel
-            )
+            if loginViewModel
+                .isAuthenticated {
 
-        } else {
+                MainTabView(
+                    loginViewModel:
+                        loginViewModel
+                )
 
-            LoginView(
-                viewModel: loginViewModel
-            )
+            } else {
+
+                LoginView(
+                    viewModel:
+                        loginViewModel
+                )
+            }
         }
+        .accessibilityIdentifier(
+            "app.content"
+        )
     }
 }
 

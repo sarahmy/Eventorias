@@ -5,27 +5,60 @@
 //  Created by Sarah Maimoun on 05/10/2026.
 //
 
+
 import SwiftUI
 import FirebaseCore
 
-class AppDelegate: NSObject, UIApplicationDelegate {
-  func application(_ application: UIApplication,
-                   didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    FirebaseApp.configure()
-    return true
-  }
+final class AppDelegate:
+    NSObject,
+    UIApplicationDelegate {
+
+    func application(
+        _ application:
+            UIApplication,
+        didFinishLaunchingWithOptions
+            launchOptions:
+            [
+                UIApplication
+                    .LaunchOptionsKey: Any
+            ]? = nil
+    ) -> Bool {
+
+        FirebaseApp.configure()
+
+        return true
+    }
 }
 
 @main
-struct YourApp: App {
-  // register app delegate for Firebase setup
-  @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+struct EventoriasApp: App {
 
-  var body: some Scene {
-    WindowGroup {
-      NavigationView {
-        ContentView()
-      }
+    @UIApplicationDelegateAdaptor(
+        AppDelegate.self
+    )
+    var delegate
+
+    var body: some Scene {
+
+        WindowGroup {
+
+#if DEBUG
+
+            if UITestConfiguration
+                .isEnabled {
+
+                UITestRootView()
+
+            } else {
+
+                ContentView()
+            }
+
+#else
+
+            ContentView()
+
+#endif
+        }
     }
-  }
 }

@@ -5,6 +5,7 @@
 //  Created by Sarah Maimoun on 06/10/2026.
 //
 
+
 import SwiftUI
 
 struct EventRowView: View {
@@ -34,11 +35,15 @@ struct EventRowView: View {
                     )
                 )
                 .font(.caption)
-                .foregroundStyle(.white.opacity(0.65))
+                .foregroundStyle(
+                    .white.opacity(0.65)
+                )
 
                 Text(event.location)
                     .font(.caption2)
-                    .foregroundStyle(.white.opacity(0.55))
+                    .foregroundStyle(
+                        .white.opacity(0.55)
+                    )
                     .lineLimit(1)
             }
 
@@ -53,11 +58,18 @@ struct EventRowView: View {
             Color.white.opacity(0.14)
         )
         .clipShape(
-            RoundedRectangle(cornerRadius: 10)
+            RoundedRectangle(
+                cornerRadius: 10
+            )
         )
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(
+            children: .combine
+        )
         .accessibilityLabel(
             "\(event.title), \(event.location)"
+        )
+        .accessibilityIdentifier(
+            "event.row.\(event.id)"
         )
     }
 
@@ -66,11 +78,18 @@ struct EventRowView: View {
         ZStack {
 
             Circle()
-                .fill(Color.white.opacity(0.15))
-                .frame(width: 38, height: 38)
+                .fill(
+                    Color.white.opacity(0.15)
+                )
+                .frame(
+                    width: 38,
+                    height: 38
+                )
 
-            Image(systemName: iconName)
-                .foregroundStyle(.white)
+            Image(
+                systemName: iconName
+            )
+            .foregroundStyle(.white)
         }
     }
 
@@ -79,9 +98,13 @@ struct EventRowView: View {
 
         if
             let imageURL = event.imageURL,
-            let url = URL(string: imageURL) {
+            let url = URL(
+                string: imageURL
+            ) {
 
-            AsyncImage(url: url) { phase in
+            AsyncImage(
+                url: url
+            ) { phase in
 
                 switch phase {
 
@@ -105,9 +128,14 @@ struct EventRowView: View {
                     imagePlaceholder
                 }
             }
-            .frame(width: 92, height: 62)
+            .frame(
+                width: 92,
+                height: 62
+            )
             .clipShape(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(
+                    cornerRadius: 8
+                )
             )
 
         } else {
@@ -120,21 +148,32 @@ struct EventRowView: View {
 
         ZStack {
 
-            Color.white.opacity(0.08)
+            Color.white
+                .opacity(0.08)
 
-            Image(systemName: iconName)
-                .font(.title2)
-                .foregroundStyle(.white.opacity(0.6))
+            Image(
+                systemName: iconName
+            )
+            .font(.title2)
+            .foregroundStyle(
+                .white.opacity(0.6)
+            )
         }
-        .frame(width: 92, height: 62)
+        .frame(
+            width: 92,
+            height: 62
+        )
         .clipShape(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(
+                cornerRadius: 8
+            )
         )
     }
 
     private var iconName: String {
 
-        switch event.category.lowercased() {
+        switch event.category
+            .lowercased() {
 
         case "music", "musique":
             return "music.note"
@@ -158,23 +197,4 @@ struct EventRowView: View {
             return "calendar"
         }
     }
-}
-
-#Preview {
-
-    EventRowView(
-        event: EventModel(
-            id: "1",
-            title: "Music festival",
-            titleLowercase: "music festival",
-            description: "Festival de musique",
-            date: Date(),
-            location: "Paris",
-            category: "music",
-            ownerId: "preview",
-            imageURL: nil
-        )
-    )
-    .padding()
-    .background(Color.black)
 }
