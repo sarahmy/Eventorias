@@ -37,7 +37,7 @@ struct ProfileView: View {
     @State private var showSuccess =
         false
 
-    @State private var showErrorAlert =
+    @State private var showError =
         false
 
     @State private var displayedErrorMessage =
@@ -46,11 +46,11 @@ struct ProfileView: View {
     @State private var isEditing =
         false
 
+    // MARK: - Init
+
     init(
-        loginViewModel:
-            LoginViewModel,
-        viewModel:
-            ProfileViewModel? = nil
+        loginViewModel: LoginViewModel,
+        viewModel: ProfileViewModel? = nil
     ) {
 
         self.loginViewModel =
@@ -64,6 +64,8 @@ struct ProfileView: View {
             )
     }
 
+    // MARK: - Body
+
     var body: some View {
 
         NavigationStack {
@@ -75,7 +77,9 @@ struct ProfileView: View {
 
                 ScrollView {
 
-                    VStack(spacing: 26) {
+                    VStack(
+                        spacing: 26
+                    ) {
 
                         avatarSection
 
@@ -114,33 +118,55 @@ struct ProfileView: View {
             )
             .toolbarBackground(
                 backgroundColor,
-                for: .navigationBar
+                for:
+                    .navigationBar
             )
             .toolbarBackground(
                 .visible,
-                for: .navigationBar
+                for:
+                    .navigationBar
             )
             .toolbarColorScheme(
                 .dark,
-                for: .navigationBar
+                for:
+                    .navigationBar
             )
             .task {
 
                 await viewModel
                     .loadProfile()
+            }
+            .task(
+                id:
+                    viewModel.errorMessage
+            ) {
 
-                isEditing =
-                    false
+                guard
+                    let message =
+                        viewModel.errorMessage,
+                    !message.isEmpty
+                else {
 
-                if let errorMessage =
-                    viewModel.errorMessage {
-
-                    displayedErrorMessage =
-                        errorMessage
-
-                    showErrorAlert =
-                        true
+                    return
                 }
+
+                await Task.yield()
+
+                displayedErrorMessage =
+                    message
+
+                showError =
+                    true
+            }
+            .onChange(
+                of:
+                    selectedPhoto
+            ) { _, newItem in
+
+                loadPhoto(
+                    from:
+                        newItem
+                )
             }
             .sheet(
                 isPresented:
@@ -152,13 +178,22 @@ struct ProfileView: View {
                         $selectedImage
                 )
             }
-            .onChange(
-                of:
-                    selectedPhoto
-            ) { _, newItem in
+            .alert(
+                "Caméra indisponible",
+                isPresented:
+                    $showCameraError
+            ) {
 
-                loadPhoto(
-                    from: newItem
+                Button(
+                    "OK",
+                    role:
+                        .cancel
+                ) {}
+
+            } message: {
+
+                Text(
+                    "La caméra n'est pas disponible sur cet appareil. Utilisez la galerie ou testez sur un iPhone."
                 )
             }
             .confirmationDialog(
@@ -192,32 +227,22 @@ struct ProfileView: View {
                 )
             }
             .alert(
-                "Caméra indisponible",
-                isPresented:
-                    $showCameraError
-            ) {
-
-                Button(
-                    "OK",
-                    role: .cancel
-                ) {}
-
-            } message: {
-
-                Text(
-                    "La caméra n'est pas disponible sur cet appareil. Utilisez la galerie ou testez sur un iPhone."
-                )
-            }
-            .alert(
                 "Erreur",
                 isPresented:
-                    $showErrorAlert
+                    $showError
             ) {
 
                 Button(
                     "OK",
-                    role: .cancel
+                    role:
+                        .cancel
                 ) {
+
+                    showError =
+                        false
+
+                    displayedErrorMessage =
+                        ""
 
                     viewModel.errorMessage =
                         nil
@@ -237,12 +262,9 @@ struct ProfileView: View {
 
                 Button(
                     "OK",
-                    role: .cancel
-                ) {
-
-                    viewModel.successMessage =
-                        nil
-                }
+                    role:
+                        .cancel
+                ) {}
 
             } message: {
 
@@ -254,6 +276,8 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Background
+
     private var backgroundColor:
         Color {
 
@@ -264,38 +288,22 @@ struct ProfileView: View {
         )
     }
 
-    // MARK: - Camera
-
-    private var cameraIsAvailable:
-        Bool {
-
-#if DEBUG
-
-        if UITestConfiguration.isEnabled {
-
-            return false
-        }
-
-#endif
-
-        return UIImagePickerController
-            .isSourceTypeAvailable(
-                .camera
-            )
-    }
-
     // MARK: - Avatar
 
     private var avatarSection:
         some View {
 
-        VStack(spacing: 14) {
+        VStack(
+            spacing: 14
+        ) {
 
             avatar
 
             if isEditing {
 
-                HStack(spacing: 12) {
+                HStack(
+                    spacing: 12
+                ) {
 
                     PhotosPicker(
                         selection:
@@ -317,7 +325,9 @@ struct ProfileView: View {
                     .buttonStyle(
                         .bordered
                     )
-                    .tint(.white)
+                    .tint(
+                        .white
+                    )
                     .accessibilityIdentifier(
                         "profile.gallery"
                     )
@@ -350,7 +360,9 @@ struct ProfileView: View {
                     .buttonStyle(
                         .bordered
                     )
-                    .tint(.white)
+                    .tint(
+                        .white
+                    )
                     .accessibilityLabel(
                         "Caméra"
                     )
@@ -362,72 +374,18 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Avatar Image
+
     @ViewBuilder
     private var avatar:
         some View {
 
         if let selectedImage {
 
-            avatarImage(
-                Image(
-                    uiImage:
-                        selectedImage
-                )
+            Image(
+                uiImage:
+                    selectedImage
             )
-
-        } else if
-            let avatarURL =
-                viewModel.avatarURL,
-            let url =
-                URL(
-                    string:
-                        avatarURL
-                ) {
-
-            AsyncImage(
-                url: url
-            ) { phase in
-
-                switch phase {
-
-                case .empty:
-
-                    avatarPlaceholder
-                        .overlay {
-
-                            ProgressView()
-                                .tint(.white)
-                        }
-
-                case .success(
-                    let image
-                ):
-
-                    avatarImage(
-                        image
-                    )
-
-                case .failure:
-
-                    avatarPlaceholder
-
-                @unknown default:
-
-                    avatarPlaceholder
-                }
-            }
-
-        } else {
-
-            avatarPlaceholder
-        }
-    }
-
-    private func avatarImage(
-        _ image: Image
-    ) -> some View {
-
-        image
             .resizable()
             .scaledToFill()
             .frame(
@@ -445,6 +403,71 @@ struct ProfileView: View {
                         lineWidth: 3
                     )
             }
+
+        } else if
+            let avatarURL =
+                viewModel.avatarURL,
+            let url =
+                URL(
+                    string:
+                        avatarURL
+                ) {
+
+            AsyncImage(
+                url:
+                    url
+            ) { phase in
+
+                switch phase {
+
+                case .empty:
+
+                    avatarPlaceholder
+                        .overlay {
+
+                            ProgressView()
+                                .tint(
+                                    .white
+                                )
+                        }
+
+                case .success(
+                    let image
+                ):
+
+                    image
+                        .resizable()
+                        .scaledToFill()
+
+                case .failure:
+
+                    avatarPlaceholder
+
+                @unknown default:
+
+                    avatarPlaceholder
+                }
+            }
+            .frame(
+                width: 120,
+                height: 120
+            )
+            .clipShape(
+                Circle()
+            )
+            .overlay {
+
+                Circle()
+                    .stroke(
+                        Color.red,
+                        lineWidth: 3
+                    )
+            }
+
+        } else {
+
+            avatarPlaceholder
+        }
     }
 
     private var avatarPlaceholder:
@@ -455,7 +478,9 @@ struct ProfileView: View {
             Circle()
                 .fill(
                     Color.white
-                        .opacity(0.12)
+                        .opacity(
+                            0.12
+                        )
                 )
 
             Image(
@@ -468,7 +493,9 @@ struct ProfileView: View {
                 )
             )
             .foregroundStyle(
-                .white.opacity(0.7)
+                .white.opacity(
+                    0.7
+                )
             )
         }
         .frame(
@@ -485,13 +512,35 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Camera
+
+    private var cameraIsAvailable:
+        Bool {
+
+#if DEBUG
+
+        if UITestConfiguration
+            .isEnabled {
+
+            return false
+        }
+
+#endif
+
+        return UIImagePickerController
+            .isSourceTypeAvailable(
+                .camera
+            )
+    }
+
     // MARK: - Identity
 
     private var identitySection:
         some View {
 
         VStack(
-            alignment: .leading,
+            alignment:
+                .leading,
             spacing: 16
         ) {
 
@@ -500,15 +549,22 @@ struct ProfileView: View {
             )
 
             VStack(
-                alignment: .leading,
+                alignment:
+                    .leading,
                 spacing: 7
             ) {
 
-                Text("Nom")
-                    .font(.caption)
-                    .foregroundStyle(
-                        .white.opacity(0.6)
+                Text(
+                    "Nom"
+                )
+                .font(
+                    .caption
+                )
+                .foregroundStyle(
+                    .white.opacity(
+                        0.6
                     )
+                )
 
                 if isEditing {
 
@@ -526,11 +582,14 @@ struct ProfileView: View {
                     )
                     .background(
                         Color.white
-                            .opacity(0.12)
+                            .opacity(
+                                0.12
+                            )
                     )
                     .clipShape(
                         RoundedRectangle(
-                            cornerRadius: 10
+                            cornerRadius:
+                                10
                         )
                     )
                     .accessibilityIdentifier(
@@ -539,44 +598,62 @@ struct ProfileView: View {
 
                 } else {
 
-                    Text(
-                        viewModel.name
-                            .isEmpty
-                        ? "Nom non renseigné"
-                        : viewModel.name
-                    )
-                    .foregroundStyle(
-                        .white
-                    )
-                    .frame(
-                        maxWidth:
-                            .infinity,
-                        alignment:
-                            .leading
-                    )
+                    HStack {
+
+                        Image(
+                            systemName:
+                                "person"
+                        )
+                        .foregroundStyle(
+                            .white.opacity(
+                                0.6
+                            )
+                        )
+
+                        Text(
+                            viewModel.name.isEmpty
+                            ? "Nom non renseigné"
+                            : viewModel.name
+                        )
+                        .foregroundStyle(
+                            .white
+                        )
+
+                        Spacer()
+                    }
                     .padding()
                     .background(
                         Color.white
-                            .opacity(0.08)
+                            .opacity(
+                                0.08
+                            )
                     )
                     .clipShape(
                         RoundedRectangle(
-                            cornerRadius: 10
+                            cornerRadius:
+                                10
                         )
                     )
                 }
             }
 
             VStack(
-                alignment: .leading,
+                alignment:
+                    .leading,
                 spacing: 7
             ) {
 
-                Text("E-mail")
-                    .font(.caption)
-                    .foregroundStyle(
-                        .white.opacity(0.6)
+                Text(
+                    "E-mail"
+                )
+                .font(
+                    .caption
+                )
+                .foregroundStyle(
+                    .white.opacity(
+                        0.6
                     )
+                )
 
                 HStack {
 
@@ -585,17 +662,20 @@ struct ProfileView: View {
                             "envelope"
                     )
                     .foregroundStyle(
-                        .white.opacity(0.6)
+                        .white.opacity(
+                            0.6
+                        )
                     )
 
                     Text(
-                        viewModel.email
-                            .isEmpty
+                        viewModel.email.isEmpty
                         ? "Adresse e-mail"
                         : viewModel.email
                     )
                     .foregroundStyle(
-                        .white.opacity(0.8)
+                        .white.opacity(
+                            0.8
+                        )
                     )
 
                     Spacer()
@@ -604,19 +684,26 @@ struct ProfileView: View {
                         systemName:
                             "lock.fill"
                     )
-                    .font(.caption)
+                    .font(
+                        .caption
+                    )
                     .foregroundStyle(
-                        .white.opacity(0.4)
+                        .white.opacity(
+                            0.4
+                        )
                     )
                 }
                 .padding()
                 .background(
                     Color.white
-                        .opacity(0.08)
+                        .opacity(
+                            0.08
+                        )
                 )
                 .clipShape(
                     RoundedRectangle(
-                        cornerRadius: 10
+                        cornerRadius:
+                            10
                     )
                 )
             }
@@ -629,7 +716,8 @@ struct ProfileView: View {
         some View {
 
         VStack(
-            alignment: .leading,
+            alignment:
+                .leading,
             spacing: 14
         ) {
 
@@ -637,7 +725,9 @@ struct ProfileView: View {
                 "Préférences"
             )
 
-            HStack(spacing: 14) {
+            HStack(
+                spacing: 14
+            ) {
 
                 Image(
                     systemName:
@@ -646,10 +736,13 @@ struct ProfileView: View {
                 .foregroundStyle(
                     .red
                 )
-                .frame(width: 24)
+                .frame(
+                    width: 24
+                )
 
                 VStack(
-                    alignment: .leading,
+                    alignment:
+                        .leading,
                     spacing: 3
                 ) {
 
@@ -661,42 +754,50 @@ struct ProfileView: View {
                     )
 
                     Text(
-                        "Préférence prévue pour une future implémentation."
+                        "Rappels des événements à venir et mises à jour importantes."
                     )
-                    .font(.caption)
+                    .font(
+                        .caption
+                    )
                     .foregroundStyle(
-                        .white.opacity(0.55)
+                        .white.opacity(
+                            0.55
+                        )
                     )
                 }
 
                 Spacer()
 
                 Toggle(
-                    "Notifications",
+                    "",
                     isOn:
                         $viewModel
                             .notificationsEnabled
                 )
                 .labelsHidden()
-                .tint(.red)
+                .tint(
+                    .red
+                )
                 .disabled(
                     !isEditing
-                )
-                .accessibilityLabel(
-                    "Notifications"
                 )
                 .accessibilityIdentifier(
                     "profile.notifications"
                 )
             }
-            .padding(16)
+            .padding(
+                16
+            )
             .background(
                 Color.white
-                    .opacity(0.10)
+                    .opacity(
+                        0.10
+                    )
             )
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: 12
+                    cornerRadius:
+                        12
                 )
             )
         }
@@ -710,94 +811,67 @@ struct ProfileView: View {
 
         if isEditing {
 
-            VStack(spacing: 12) {
+            VStack(
+                spacing: 12
+            ) {
 
                 saveButton
 
-                Button(
-                    "Annuler les modifications"
-                ) {
-
-                    if
-                        let profile =
-                            viewModel.profile {
-
-                        viewModel.name =
-                            profile.name
-
-                        viewModel.email =
-                            profile.email
-
-                        viewModel.avatarURL =
-                            profile.avatarURL
-
-                        viewModel
-                            .notificationsEnabled =
-                            profile
-                                .notificationsEnabled
-                    }
-
-                    selectedImage =
-                        nil
-
-                    selectedPhoto =
-                        nil
-
-                    isEditing =
-                        false
-                }
-                .foregroundStyle(
-                    .white.opacity(0.8)
-                )
-                .accessibilityIdentifier(
-                    "profile.cancelEdit"
-                )
+                cancelEditButton
             }
 
         } else {
 
-            Button {
-
-                isEditing =
-                    true
-
-            } label: {
-
-                Label(
-                    "Modifier le profil",
-                    systemImage:
-                        "pencil"
-                )
-                .fontWeight(
-                    .semibold
-                )
-                .foregroundStyle(
-                    .white
-                )
-                .frame(
-                    maxWidth:
-                        .infinity
-                )
-                .frame(
-                    height: 52
-                )
-                .background(
-                    Color.red
-                )
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: 8
-                    )
-                )
-            }
-            .accessibilityLabel(
-                "Modifier le profil"
-            )
-            .accessibilityIdentifier(
-                "profile.edit"
-            )
+            editButton
         }
     }
+
+    // MARK: Edit
+
+    private var editButton:
+        some View {
+
+        Button {
+
+            isEditing =
+                true
+
+        } label: {
+
+            Label(
+                "Modifier le profil",
+                systemImage:
+                    "pencil"
+            )
+            .fontWeight(
+                .semibold
+            )
+            .foregroundStyle(
+                .white
+            )
+            .frame(
+                maxWidth:
+                    .infinity
+            )
+            .frame(
+                height: 52
+            )
+            .background(
+                Color.red
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius:
+                        8
+                )
+            )
+        }
+        .accessibilityIdentifier(
+            "profile.edit"
+        )
+    }
+
+    // MARK: Save
 
     private var saveButton:
         some View {
@@ -820,29 +894,42 @@ struct ProfileView: View {
                                 imageData
                         )
 
-                if success {
+                guard success else {
 
-                    selectedImage =
-                        nil
+                    return
+                }
 
-                    selectedPhoto =
-                        nil
+                let notificationsAccepted =
+                    await applyNotificationPreference()
 
-                    isEditing =
+                if
+                    viewModel
+                        .notificationsEnabled,
+                    !notificationsAccepted {
+
+                    viewModel
+                        .notificationsEnabled =
                         false
 
-                    showSuccess =
-                        true
-
-                } else {
-
-                    displayedErrorMessage =
-                        viewModel.errorMessage
-                        ?? "Impossible d'enregistrer le profil."
-
-                    showErrorAlert =
-                        true
+                    _ =
+                        await viewModel
+                            .saveProfile(
+                                imageData:
+                                    nil
+                            )
                 }
+
+                selectedImage =
+                    nil
+
+                selectedPhoto =
+                    nil
+
+                isEditing =
+                    false
+
+                showSuccess =
+                    true
             }
 
         } label: {
@@ -868,22 +955,78 @@ struct ProfileView: View {
             )
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: 8
+                    cornerRadius:
+                        8
                 )
             )
         }
         .disabled(
             viewModel.isLoading
         )
-        .accessibilityLabel(
-            "Enregistrer les modifications"
-        )
         .accessibilityIdentifier(
             "profile.save"
         )
     }
 
-    // MARK: - Logout
+    // MARK: Cancel Edit
+
+    private var cancelEditButton:
+        some View {
+
+        Button {
+
+            selectedImage =
+                nil
+
+            selectedPhoto =
+                nil
+
+            isEditing =
+                false
+
+            Task {
+
+                await viewModel
+                    .loadProfile()
+            }
+
+        } label: {
+
+            Text(
+                "Annuler les modifications"
+            )
+            .fontWeight(
+                .medium
+            )
+            .foregroundStyle(
+                .white
+            )
+            .frame(
+                maxWidth:
+                    .infinity
+            )
+            .frame(
+                height: 48
+            )
+            .background(
+                Color.white
+                    .opacity(
+                        0.10
+                    )
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius:
+                        8
+                )
+            )
+        }
+        .accessibilityIdentifier(
+            "profile.cancelEdit"
+        )
+    }
+
+    // MARK: Logout
 
     private var logoutButton:
         some View {
@@ -915,20 +1058,46 @@ struct ProfileView: View {
             )
             .background(
                 Color.red
-                    .opacity(0.12)
+                    .opacity(
+                        0.12
+                    )
             )
             .clipShape(
                 RoundedRectangle(
-                    cornerRadius: 8
+                    cornerRadius:
+                        8
                 )
             )
         }
-        .accessibilityLabel(
-            "Se déconnecter"
-        )
         .accessibilityIdentifier(
             "profile.logout"
         )
+    }
+
+    // MARK: - Notification Preference
+
+    private func applyNotificationPreference()
+        async -> Bool {
+
+#if DEBUG
+
+        // Aucun popup système pendant XCTest.
+        if UITestConfiguration
+            .isEnabled {
+
+            return true
+        }
+
+#endif
+
+        return await
+            NotificationManager
+                .shared
+                .updateNotifications(
+                    enabled:
+                        viewModel
+                            .notificationsEnabled
+                )
     }
 
     // MARK: - Photo
@@ -954,7 +1123,8 @@ struct ProfileView: View {
                         ),
                 let image =
                     UIImage(
-                        data: data
+                        data:
+                            data
                     )
             else {
 
@@ -966,18 +1136,7 @@ struct ProfileView: View {
         }
     }
 
-    private func sectionTitle(
-        _ title: String
-    ) -> some View {
-
-        Text(title)
-            .font(
-                .headline
-            )
-            .foregroundStyle(
-                .white
-            )
-    }
+    // MARK: - Loading
 
     private var loadingOverlay:
         some View {
@@ -985,14 +1144,22 @@ struct ProfileView: View {
         ZStack {
 
             Color.black
-                .opacity(0.45)
+                .opacity(
+                    0.45
+                )
                 .ignoresSafeArea()
 
-            VStack(spacing: 12) {
+            VStack(
+                spacing: 12
+            ) {
 
                 ProgressView()
-                    .tint(.white)
-                    .scaleEffect(1.2)
+                    .tint(
+                        .white
+                    )
+                    .scaleEffect(
+                        1.2
+                    )
 
                 Text(
                     "Chargement..."
@@ -1003,4 +1170,29 @@ struct ProfileView: View {
             }
         }
     }
+
+    // MARK: - Helpers
+
+    private func sectionTitle(
+        _ title: String
+    ) -> some View {
+
+        Text(
+            title
+        )
+        .font(
+            .headline
+        )
+        .foregroundStyle(
+            .white
+        )
+    }
+}
+
+#Preview {
+
+    ProfileView(
+        loginViewModel:
+            LoginViewModel()
+    )
 }

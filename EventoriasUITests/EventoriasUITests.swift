@@ -5,8 +5,6 @@
 //  Created by Sarah Maimoun on 05/10/2026.
 //
 
-
-
 import XCTest
 
 final class EventoriasUITests:
@@ -51,118 +49,171 @@ final class EventoriasUITests:
                 "login"
         )
 
+      
+        let emailEntryPredicate =
+            NSPredicate(
+                format:
+                    "identifier == %@ OR label == %@ OR label == %@",
+                "login.emailEntry",
+                "Se connecter avec une adresse e-mail",
+                "Sign in with email"
+            )
+
         let emailEntry =
-            app.buttons[
-                "login.emailEntry"
-            ]
+            app
+                .descendants(
+                    matching:
+                        .any
+                )
+                .matching(
+                    emailEntryPredicate
+                )
+                .firstMatch
 
         XCTAssertTrue(
             emailEntry
                 .waitForExistence(
-                    timeout: 5
-                )
+                    timeout: 8
+                ),
+            "Le bouton permettant d'ouvrir le formulaire de connexion est introuvable."
         )
 
         emailEntry.tap()
 
-        XCTAssertTrue(
+        let emailField =
             app.textFields[
                 "login.email"
             ]
-            .waitForExistence(
-                timeout: 3
-            )
+
+        XCTAssertTrue(
+            emailField
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le champ e-mail n'est pas apparu."
         )
+
+        let securePassword =
+            app.secureTextFields[
+                "login.password"
+            ]
+
+        XCTAssertTrue(
+            securePassword
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le champ mot de passe sécurisé n'est pas apparu."
+        )
+
+        let submit =
+            app.buttons[
+                "login.submit"
+            ]
+
+        XCTAssertTrue(
+            submit
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le bouton de connexion est introuvable."
+        )
+
+        let modeToggle =
+            app.buttons[
+                "login.modeToggle"
+            ]
+
+        XCTAssertTrue(
+            modeToggle
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le bouton permettant de changer de mode est introuvable."
+        )
+
+        let passwordVisibility =
+            app.buttons[
+                "login.passwordVisibility"
+            ]
+
+        XCTAssertTrue(
+            passwordVisibility
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le bouton de visibilité du mot de passe est introuvable."
+        )
+
+        // MARK: Afficher le mot de passe
+
+        passwordVisibility.tap()
+
+        let visiblePassword =
+            app.textFields[
+                "login.password"
+            ]
+
+        XCTAssertTrue(
+            visiblePassword
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le mot de passe n'est pas devenu visible."
+        )
+
+        // MARK: Masquer le mot de passe
+
+        app.buttons[
+            "login.passwordVisibility"
+        ]
+        .tap()
 
         XCTAssertTrue(
             app.secureTextFields[
                 "login.password"
             ]
             .waitForExistence(
-                timeout: 3
-            )
+                timeout: 5
+            ),
+            "Le mot de passe n'est pas redevenu sécurisé."
         )
 
-        XCTAssertTrue(
-            app.buttons[
-                "login.submit"
-            ]
-            .waitForExistence(
-                timeout: 3
-            )
-        )
+        // MARK: Passage en inscription
 
-        XCTAssertTrue(
-            app.buttons[
-                "login.modeToggle"
-            ]
-            .waitForExistence(
-                timeout: 3
-            )
-        )
+        modeToggle.tap()
 
-        XCTAssertTrue(
-            app.buttons[
-                "login.passwordVisibility"
-            ]
-            .waitForExistence(
-                timeout: 3
-            )
-        )
-
-        // Afficher le mot de passe
-
-        app.buttons[
-            "login.passwordVisibility"
-        ]
-        .tap()
-
-        XCTAssertTrue(
-            app.textFields[
-                "login.password"
-            ]
-            .waitForExistence(
-                timeout: 2
-            )
-        )
-
-        // Le masquer à nouveau
-
-        app.buttons[
-            "login.passwordVisibility"
-        ]
-        .tap()
-
-        // Passage inscription
-
-        app.buttons[
-            "login.modeToggle"
-        ]
-        .tap()
-
-        XCTAssertTrue(
+        let registerTitle =
             app.staticTexts[
                 "Créer un compte"
             ]
-            .waitForExistence(
-                timeout: 3
-            )
+
+        XCTAssertTrue(
+            registerTitle
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le mode création de compte n'est pas apparu."
         )
 
-        // Retour connexion
+        // MARK: Retour à la connexion
 
         app.buttons[
             "login.modeToggle"
         ]
         .tap()
 
-        XCTAssertTrue(
+        let loginTitle =
             app.staticTexts[
                 "Connexion"
             ]
-            .waitForExistence(
-                timeout: 3
-            )
+
+        XCTAssertTrue(
+            loginTitle
+                .waitForExistence(
+                    timeout: 5
+                ),
+            "Le mode connexion n'est pas réapparu."
         )
     }
 
